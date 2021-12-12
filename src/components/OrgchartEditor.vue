@@ -95,16 +95,16 @@ import "vue-json-pretty/lib/styles.css";
 export default {
   name: "OrgchartEditor",
   components: {},
+  props: ["id"],
   mounted() {
     this.axios
       .get(
-        "http://127.0.0.1:8090/analyze-orgchart/?orgchart_id=T3JnQ2hhcnROb2RlOjg=&page=0"
+        `http://127.0.0.1:8090/analyze-orgchart/?orgchart_id=${this.$props.id}&page=0`
       )
       .then((response) => (this.dataset = response["data"]["items"]));
 
     const image = new window.Image();
-    image.src =
-      "http://127.0.0.1:8090/orgchart-image/?orgchart_id=T3JnQ2hhcnROb2RlOjg=&page=0";
+    image.src = `http://127.0.0.1:8090/orgchart-image/?orgchart_id=${this.$props.id}&page=0`;
     image.onload = () => {
       // set image only when it is loaded
       this.backgroundImage = image;
@@ -233,41 +233,6 @@ export default {
         tr.nodes(nodes);
       }
     },
-    generate(e) {
-      let elements = [];
-      if (e == null) {
-        for (let i in this.dataset) {
-          console.log(this.dataset[i].id);
-          console.log(this.dataset[i].id in this.parents);
-          if (!(this.dataset[i].id in this.parents)) {
-            elements.push(i);
-          }
-        }
-      } else {
-        for (let i in this.dataset) {
-          if (
-            this.dataset[i].id in this.parents &&
-            this.parents[this.dataset[i].id] === e
-          ) {
-            elements.push(i);
-          }
-        }
-      }
-      console.log("children");
-      console.log(elements);
-
-      let results = [];
-      for (let o in elements) {
-        let children = this.generate(this.dataset[elements[o]].id);
-        let result = this.dataset[elements[o]];
-        if (children.length > 0) {
-          result["children"] = children;
-        }
-        results.push(result);
-      }
-      return results;
-    },
-
     assignParent(parent) {
       let tr = this.$refs.transformer.getNode();
       console.log(parent.attrs.id);
